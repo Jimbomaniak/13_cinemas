@@ -1,4 +1,5 @@
-import requests, re
+import requests
+import re
 from bs4 import BeautifulSoup as BS
 
 
@@ -43,26 +44,25 @@ def fetch_movie_info(movie_title):
     return (rate, rating_count)
 
 
-def sort_movies(movies, how_sort='rate'):
-    sort_element = how_sort
-    for i in range(len(movies)):
-        for j in range(len(movies) - 1, i, -1):
-            if movies[j][sort_element] > movies[j-1][sort_element]:
-                movies[j], movies[j-1] = movies[j-1], movies[j]
-
+def sort_movies(movies):
+    enter = int(input('0 - movies by rating\n'
+                      '1 - movies by cinema numbers\nEnter 1 or 0: '))
+    if enter:
+        sort_by = 'cinema_number'
+    else:
+        sort_by = 'rate'
+    movies.sort(key=lambda item: item[sort_by], reverse=True)
     return movies
 
 
 def output_movies_to_console(movies):
     for num, movie in enumerate(movies[0:10]):
-        print('{0}. {title}, movie rate - {rate}, you can watch in {cinema_number} cinema'.format(num+1, **movie))
+        print('{0}. {title}, movie rate - {rate},'
+              'you can watch in {cinema_number} cinema'.format(num+1, **movie))
         print('------')
 
 
 if __name__ == '__main__':
     movies = parse_afisha_list(fetch_afisha_page())
-    sort_movies1 = sort_movies(movies)
-    sort_movies2 = sort_movies(movies, 'cinema_number')
-    output_movies_to_console(sort_movies1)
-    output_movies_to_console(sort_movies2)
-
+    sort_movies = sort_movies(movies)
+    output_movies_to_console(sort_movies)
