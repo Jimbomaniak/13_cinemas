@@ -44,10 +44,8 @@ def fetch_movie_info(movie_title):
     return (rate, rating_count)
 
 
-def sort_movies(movies):
-    enter = int(input('0 - movies by rating\n'
-                      '1 - movies by cinema numbers\nEnter 1 or 0: '))
-    if enter:
+def sort_movies(movies, choice):
+    if choice:
         sort_by = 'cinema_number'
     else:
         sort_by = 'rate'
@@ -64,5 +62,7 @@ def output_movies_to_console(movies):
 
 if __name__ == '__main__':
     movies = parse_afisha_list(fetch_afisha_page())
-    sort_movies = sort_movies(movies)
+    choice = int(input('0 - movies by rating\n'
+                       '1 - movies by cinema numbers\nEnter 1 or 0: '))
+    sort_movies = sort_movies(movies, choice)
     output_movies_to_console(sort_movies)
