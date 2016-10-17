@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup as BS
 
 AFISHA_URL = 'http://www.afisha.ru/msk/schedule_cinema/'
 KINOPOISK_URL = 'https://www.kinopoisk.ru/get'
+NUMBER_MOVIES_TO_SHOW = 10
 
 
 def fetch_afisha_page():
@@ -18,15 +19,11 @@ def parse_afisha_list(html):
         'class': 'b-theme-schedule m-schedule-with-collapse',
         'id': 'schedule'})
     movies = []
-    for num,movie in enumerate(movies_info.find_all(class_='object s-votes-hover-area collapsed')):
-        print('{0} movies find'.format(num+1))
-        rate, rating_count = fetch_movie_info(movie.h3.a.text)
-        movies.append({
-            'title': movie.h3.a.text,
-            'cinema_number': len(movie.find_all('td', {'class': 'b-td-item'})),
-            'rate': rate,
-            'ratingCount': rating_count
-            })
+    for movie in movies_info.find_all(class_='object s-votes-hover-area collapsed'):
+        one_movie = fetch_movie_info(movie.h3.a.text)
+        one_movie['title'] = movie.h3.a.text
+        one_movie['cinema_number'] = len(movie.find_all('td', {'class': 'b-td-item'}))
+        movies.append(one_movie)
     return movies
 
 
@@ -41,20 +38,17 @@ def fetch_movie_info(movie_title):
         rating_count = int(rating_count_digits.group())
     except AttributeError:
         rate, rating_count = 0, 0
-    return (rate, rating_count)
+    return {'rate': rate, 'ratingCount': rating_count}
 
 
-def sort_movies(movies, choice):
-    if choice:
-        sort_by = 'cinema_number'
-    else:
-        sort_by = 'rate'
+def sort_movies(movies, how_sort_movies):
+    sort_by = how_sort_movies and 'cinema_number' or 'rate'
     movies.sort(key=lambda item: item[sort_by], reverse=True)
     return movies
 
 
-def output_movies_to_console(movies):
-    for num, movie in enumerate(movies[0:10]):
+def output_movies_to_console(movies, number_movies_to_show):
+    for num, movie in enumerate(movies[:number_movies_to_show]):
         print('{0}. {title}, movie rate - {rate},'
               'you can watch in {cinema_number} cinema'.format(num+1, **movie))
         print('------')
@@ -62,7 +56,7 @@ def output_movies_to_console(movies):
 
 if __name__ == '__main__':
     movies = parse_afisha_list(fetch_afisha_page())
-    choice = int(input('0 - movies by rating\n'
+    how_sort_movies = int(input('0 - movies by rating\n'
                        '1 - movies by cinema numbers\nEnter 1 or 0: '))
-    sort_movies = sort_movies(movies, choice)
-    output_movies_to_console(sort_movies)
+    sort_movies = sort_movies(movies, how_sort_movies)
+    output_movies_to_console(sort_movies, NUMBER_MOVIES_TO_SHOW)
